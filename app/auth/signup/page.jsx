@@ -1,4 +1,6 @@
 "use client";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const SignUp = () => {
@@ -7,10 +9,30 @@ const[password, setPassword] = useState('');
 const[loading, setLoading] = useState(false);
 const[error, setError] = useState(null);
 
+const supabase = createClient();
+const router = useRouter();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        // Handle sign-up logic here
+        setLoading(true);
+        setError(null);
+        try{
+           const { error } = await supabase.auth.signUp({
+                email,
+                password,
+                options:{
+                    emailRedirectTo: window.location.origin
+                }
+            });
+
+            if(error) throw error;
+            router.push("/auth/signup-success");
+
+        }catch(err){
+            setError("Failed to sign up. Please try again.", error);
+        }finally{
+            setLoading(false);
+        }
     }
     return (
         <main className='flex flex-col items-center justify-center h-screen'>

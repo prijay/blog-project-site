@@ -1,4 +1,6 @@
 "use client";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const Login = () => {
@@ -7,10 +9,26 @@ const[password, setPassword] = useState('');
 const[loading, setLoading] = useState(false);
 const[error, setError] = useState(null);
 
+const supabase = createClient();
+const router = useRouter();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        // Handle sign-up logic here
+        setLoading(true);
+        setError(null);
+        try{
+                const {error} = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                if(error) throw error;
+                router.push("/");
+        }   
+        catch(err){
+            setError("Failed to log in. Please try again.");
+        }finally{
+            setLoading(false);
+        }
     }
     return (
         <main className='flex flex-col items-center justify-center h-screen'>
@@ -40,7 +58,7 @@ const[error, setError] = useState(null);
                         type='submit'
                         className='bg-violet-400 text-black font-bold py-2 px-4 rounded-lg hover:bg-violet-500 transition duration-300'
                     >
-                        Sign Up
+                        Log In
                     </button>
                     <div>
                         Don't have an account? <a href='/auth/signup' className='text-violet-800 hover:underline'>Sign Up</a>
