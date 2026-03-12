@@ -39,7 +39,7 @@ const router = useRouter();
             <card className='bg-violet-100 border-2 border-violet-400 rounded-lg px-4 py-3 text-gray-700 flex flex-col items-center justify-center w-full max-w-md'>
                 <h1 className="text-2xl font-bold w-full text-center">Sign Up</h1>
                 <form onSubmit={handleSubmit} className='flex flex-col gap-2 mt-4 w-full px-2'>
-                    <label htmlFor='email' className='text-sm font-medium w-full'>Email</label>
+                    <label className='text-sm font-medium w-full'>Email</label>
                     <input
                         type='email'
                         value={email}
@@ -48,7 +48,7 @@ const router = useRouter();
                         className='w-full rounded-md bg-transparent border-2 border-violet-300 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:pl-2 hover:border-violet-600'
                         required
                     />
-                    <label htmlFor='password' className='text-sm font-medium w-full'>Password</label>
+                    <label className='text-sm font-medium w-full'>Password</label>
                     <input
                         type='password'
                         value={password}

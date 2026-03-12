@@ -95,6 +95,51 @@ export default function EditorPage() {
 
 
     const handleSave = async () => {
+        setSaving(true);
+        setError(null);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                setError("User not authenticated");
+                setSaving(false);
+                return;
+            }
+            const content = await editor.save();
+            console.log("Post content:", content);
+            if (postId) {
+                const { error: updateError } = await supabase.from("posts").update({
+                    title,
+                    excerpt,
+                    content: JSON.stringify(content),
+                    updated_at: new Date().toISOString()
+                }).eq("id", postId)
+                    .eq("user_id", user.id);
+
+                if (updateError) {
+                    throw updateError;
+                }
+                else {
+                    router.push("/");
+                }
+            }
+            else {
+                const { error: insertError } = await supabase.from("posts").insert({
+                    title,
+                    excerpt,
+                    content: JSON.stringify(content),
+                    user_id: user.id
+                });
+                if (insertError) {
+                    throw insertError;
+                }
+                else {
+                    router.push("/");
+                }
+            }
+        }
+        catch (err) {
+            setError("Failed to save post. Please try again.");
+        }
 
     }
     return (
