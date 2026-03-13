@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -19,14 +19,21 @@ export default function EditorPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const postId = searchParams.get("id");
+    console.log("Editing post with ID:", postId);
     const supabase = createClient();
     const { theme, setTheme } = useTheme();
+    const editorRef = useRef(null);
     useEffect(() => {
         setMounted(true);
     }, [])
 
     useEffect(() => {
-        const initiEditor = async () => {
+        console.log("Initializing editor current:", editorRef.current);
+        if (editorRef.current) {
+           return;
+        }
+        if(!editorRef.current){
+const initiEditor = async () => {
             const EditorJS = (await import("@editorjs/editorjs")).default;
             const Header = (await import("@editorjs/header")).default;
             const Paragraph = (await import("@editorjs/paragraph")).default;
@@ -34,7 +41,7 @@ export default function EditorPage() {
             const Image = (await import("@editorjs/image")).default;
             const Quote = (await import("@editorjs/quote")).default;
             const Code = (await import("@editorjs/code")).default;
-            const editorInstance = new EditorJS({
+             editorRef.current = new EditorJS({
                 holder: 'editorjs',
                 tools: {
                     header: Header,
@@ -73,23 +80,44 @@ export default function EditorPage() {
                     },
                     onReady: () => {
                         console.log("Editor.js is ready to work!");
+                        editorRef.current = editorRef.current;
+                        setLoading(false);
                     }
                 },
 
+            });
+            editorRef.current.isReady.then(() => {
+                console.log("Editor.js is ready to work!");
+                editorRef.current = editorRef.current;
+                setLoading(false);
+            }).catch((error) => {
+                console.error("Error initializing Editor.js:", error);
+                setError("Failed to initialize editor. Please try again.");
+                setLoading(false);
             });
 
             if (postId) {
                 const { data: post } = await supabase.from("posts").select("*").eq("id", postId).single();
                 if (post) {
                     setTitle(post.title);
-                    await editorInstance.render(post.content);
+                    setExcerpt(post.excerpt);
+                    console.log("Loaded post content:", post.content);
+                    await editorRef.current.isReady;
+                    await editorRef.current.clear();
+                    let content = post.content;
+                    if (typeof content === "string") {
+                        content = JSON.parse(content);
+                    }
+                    await editorRef.current.render(content);
 
                 }
             }
-            setEditor(editorInstance);
+            setEditor(editorRef.current);
         }
         initiEditor();
 
+        }
+        
     }, [postId, supabase]);
 
 

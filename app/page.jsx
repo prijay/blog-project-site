@@ -36,7 +36,7 @@ const page = async() => {
                   <p className='text-gray-700'>{post.excerpt}</p>
                 </div>
                 <button className='bg-violet-400 text-black font-bold py-2 px-4 rounded-lg hover:bg-violet-500 transition duration-300 mt-4 self-start'>
-                  <Link href={`/editor/${post.id}`}>Edit Post</Link>    
+                  <Link href={`/editor?id=${post.id}`}>Edit Post</Link>    
                 </button>
               </div>
             ))}
